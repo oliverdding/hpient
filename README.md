@@ -1,6 +1,6 @@
 # HTTP Client Test
 
-This project is used to test sttp.
+This project is used to test sttp with apache arrow.
 
 ## TODO
 

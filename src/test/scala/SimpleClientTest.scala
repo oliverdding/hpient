@@ -2,7 +2,6 @@ package com.github.oliverdding.hpient
 
 import org.scalatest.funsuite.AnyFunSuite
 
-import scala.util.Using
 import sttp.client3._
 import sttp.model.StatusCode
 
@@ -10,8 +9,11 @@ class SimpleClientTest extends AnyFunSuite {
 
   test("ping") {
     val myRequest = basicRequest
-      .auth.basic("default", "")
       .get(uri"http://dev:8123/ping")
+      .header("Connection", "Close")
+      .header("Content-Type", "text/plain")
+      .auth
+      .basic("default", "")
 
     val backend = HttpURLConnectionBackend()
     val response = myRequest.send(backend)
@@ -22,9 +24,13 @@ class SimpleClientTest extends AnyFunSuite {
 
   test("select") {
     val myRequest = basicRequest
-      .auth.basic("default", "")
-      .body("SELECT * FROM system.table_engines")
       .post(uri"http://dev:8123/?compress=1")
+      .header("Connection", "Close")
+      .header("Content-Type", "text/plain")
+      .auth
+      .basic("default", "")
+      .body("SELECT * FROM system.table_engines")
+
     val backend = HttpURLConnectionBackend()
     val response = myRequest.send(backend)
 
@@ -34,9 +40,13 @@ class SimpleClientTest extends AnyFunSuite {
 
   test("arrow") {
     val myRequest = basicRequest
-      .auth.basic("default", "")
-      .body("SELECT * FROM system.table_engines FORMAT ArrowStream")
       .post(uri"http://dev:8123/?compress=1")
+      .header("Connection", "Close")
+      .header("Content-Type", "text/plain")
+      .auth
+      .basic("default", "")
+      .body("SELECT * FROM system.table_engines FORMAT ArrowStream")
+
     val backend = HttpURLConnectionBackend()
     val response = myRequest.send(backend)
 
