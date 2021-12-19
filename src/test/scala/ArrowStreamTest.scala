@@ -1,15 +1,17 @@
 package com.github.oliverdding.hpient
 
 import org.apache.arrow.memory.RootAllocator
-import org.apache.arrow.vector.ipc.ArrowStreamReader
+import org.apache.arrow.vector.ValueVector
+import org.apache.arrow.vector.ipc.{ArrowFileReader, ArrowStreamReader, SeekableReadChannel}
+import org.apache.commons.compress.utils.{IOUtils, SeekableInMemoryByteChannel}
 import org.apache.log4j.{BasicConfigurator, Level, Logger}
 import org.apache.spark.sql.vectorized.{ArrowColumnVector, ColumnVector, ColumnarBatch}
 import org.scalatest.funsuite.AnyFunSuite
 import sttp.client3._
 import sttp.model.StatusCode
 
-import java.io.ByteArrayInputStream
-import scala.jdk.CollectionConverters.IteratorHasAsScala
+import java.io.{ByteArrayInputStream, IOException}
+import scala.jdk.CollectionConverters.{CollectionHasAsScala, IteratorHasAsScala}
 import scala.util.Using
 
 class ArrowStreamTest extends AnyFunSuite {
@@ -18,7 +20,7 @@ class ArrowStreamTest extends AnyFunSuite {
 
   Logger.getRootLogger.setLevel(Level.TRACE)
 
-  test("arrow") {
+  test("arrow stream from clickhouse") {
     val myRequest = basicRequest
       .post(uri"http://dev:8123/")
       .header("Connection", "Close")
@@ -61,5 +63,48 @@ class ArrowStreamTest extends AnyFunSuite {
     }
 
     backend.close()
+  }
+
+  test("arrow from file") {
+    Using(getClass.getResourceAsStream("/table_engines.arrow")) {
+      arrowFileStream =>
+        Using(
+          new SeekableInMemoryByteChannel(IOUtils.toByteArray(arrowFileStream))
+        ) { channel =>
+          val seekableReadChannel = new SeekableReadChannel(channel)
+          Using(
+            new ArrowFileReader(
+              seekableReadChannel,
+              new RootAllocator(Integer.MAX_VALUE)
+            )
+          ) { arrowFileReader =>
+            val root = arrowFileReader.getVectorSchemaRoot
+            println(s"schema is ${root.getSchema}")
+
+            val arrowBlocks = arrowFileReader.getRecordBlocks
+            println(s"num of arrow blocks is ${arrowBlocks.size()}")
+
+            arrowBlocks.asScala.foreach { arrowBlock =>
+              if(!arrowFileReader.loadRecordBatch(arrowBlock)) {
+                throw new IOException("Expected to read record batch")
+              }
+              val fieldVectorItr = root.getFieldVectors.iterator()
+              val sparkVectors = fieldVectorItr.asScala
+                .map[ColumnVector] { fieldVector =>
+                  println(fieldVector)
+                  new ArrowColumnVector(fieldVector)
+                }
+                .toArray
+              Using(new ColumnarBatch(sparkVectors, root.getRowCount)) {
+                columnarBatch =>
+                  println("Got it --->")
+                  println(
+                    s"rows: ${columnarBatch.numRows()}; cols: ${columnarBatch.numCols()}"
+                  )
+              }
+            }
+          }
+        }
+    }
   }
 }
