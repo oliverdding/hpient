@@ -24,7 +24,7 @@
     <orderEntry type="library" name="sbt: com.google.code.findbugs:jsr305:3.0.2:jar" level="project" />
     <orderEntry type="library" name="sbt: com.google.code.gson:gson:2.8.6:jar" level="project" />
     <orderEntry type="library" name="sbt: com.google.crypto.tink:tink:1.6.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: com.google.flatbuffers:flatbuffers-java:1.12.0:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: com.google.flatbuffers:flatbuffers-java:1.9.0:jar" level="project" />
     <orderEntry type="library" name="sbt: com.google.guava:guava:16.0.1:jar" level="project" />
     <orderEntry type="library" name="sbt: com.google.protobuf:protobuf-java:3.14.0:jar" level="project" />
     <orderEntry type="library" name="sbt: com.ning:compress-lzf:1.0.3:jar" level="project" />
@@ -51,7 +51,7 @@
     <orderEntry type="library" name="sbt: io.netty:netty-all:4.1.68.Final:jar" level="project" />
     <orderEntry type="library" name="sbt: io.netty:netty-buffer:4.1.50.Final:jar" level="project" />
     <orderEntry type="library" name="sbt: io.netty:netty-codec:4.1.50.Final:jar" level="project" />
-    <orderEntry type="library" name="sbt: io.netty:netty-common:4.1.68.Final:jar" level="project" />
+    <orderEntry type="library" name="sbt: io.netty:netty-common:4.1.50.Final:jar" level="project" />
     <orderEntry type="library" name="sbt: io.netty:netty-handler:4.1.50.Final:jar" level="project" />
     <orderEntry type="library" name="sbt: io.netty:netty-resolver:4.1.50.Final:jar" level="project" />
     <orderEntry type="library" name="sbt: io.netty:netty-transport-native-epoll:4.1.50.Final:jar" level="project" />
@@ -68,10 +68,10 @@
     <orderEntry type="library" name="sbt: net.razorvine:pyrolite:4.30:jar" level="project" />
     <orderEntry type="library" name="sbt: net.sf.py4j:py4j:0.10.9.2:jar" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="sbt: org.antlr:antlr4-runtime:4.8:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.apache.arrow:arrow-format:6.0.1:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.apache.arrow:arrow-memory-core:6.0.1:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: org.apache.arrow:arrow-format:2.0.0:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: org.apache.arrow:arrow-memory-core:2.0.0:jar" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="sbt: org.apache.arrow:arrow-memory-netty:2.0.0:jar" level="project" />
-    <orderEntry type="library" name="sbt: org.apache.arrow:arrow-vector:6.0.1:jar" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="sbt: org.apache.arrow:arrow-vector:2.0.0:jar" level="project" />
     <orderEntry type="library" name="sbt: org.apache.avro:avro-ipc:1.10.2:jar" level="project" />
     <orderEntry type="library" name="sbt: org.apache.avro:avro-mapred:1.10.2:jar" level="project" />
     <orderEntry type="library" name="sbt: org.apache.avro:avro:1.10.2:jar" level="project" />

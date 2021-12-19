@@ -34,14 +34,14 @@ class ArrowStreamTest extends AnyFunSuite {
     val response = myRequest.send(backend)
     assert(response.code == StatusCode.Ok)
     val body = response.body match {
-      case Left(x)  => fail(s"HTTP return error: $x")
+      case Left(x) => fail(s"HTTP return error: $x")
       case Right(x) => x
     }
 
     Using(new RootAllocator(Long.MaxValue)) { allocator =>
       Using(new ArrowStreamReader(new ByteArrayInputStream(body), allocator)) {
         streamReader =>
-          while (streamReader.loadNextBatch()) {
+          while (streamReader.loadNextBatch())
             Using(streamReader.getVectorSchemaRoot) { schemaRoot =>
               println(schemaRoot.getSchema)
               val fieldVectorItr = schemaRoot.getFieldVectors.iterator()
@@ -58,7 +58,6 @@ class ArrowStreamTest extends AnyFunSuite {
                   )
               }
             }
-          }
       }
     }
 
@@ -83,25 +82,21 @@ class ArrowStreamTest extends AnyFunSuite {
 
             val arrowBlocks = arrowFileReader.getRecordBlocks
             println(s"num of arrow blocks is ${arrowBlocks.size()}")
+            println(s"num of col: ${root.getFieldVectors.size()}")
 
             arrowBlocks.asScala.foreach { arrowBlock =>
-              if(!arrowFileReader.loadRecordBatch(arrowBlock)) {
+              if (!arrowFileReader.loadRecordBatch(arrowBlock)) {
                 throw new IOException("Expected to read record batch")
               }
+              println(s"num of row in this block: ${root.getRowCount}")
               val fieldVectorItr = root.getFieldVectors.iterator()
               val sparkVectors = fieldVectorItr.asScala
                 .map[ColumnVector] { fieldVector =>
-                  println(fieldVector)
                   new ArrowColumnVector(fieldVector)
                 }
                 .toArray
-              Using(new ColumnarBatch(sparkVectors, root.getRowCount)) {
-                columnarBatch =>
-                  println("Got it --->")
-                  println(
-                    s"rows: ${columnarBatch.numRows()}; cols: ${columnarBatch.numCols()}"
-                  )
-              }
+              val batch = new ColumnarBatch(sparkVectors, root.getRowCount)
+              println(batch)
             }
           }
         }
