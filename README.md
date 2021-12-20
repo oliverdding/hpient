@@ -5,7 +5,7 @@ This project is used to test sttp with apache arrow.
 ## TODO
 
 1. Try to parse the schema with HTTP interface
-2. Try to parse the chunked data to specific datatype wanted
+2. Need stream api with sttp: import akka?
 
 ## Dev
 

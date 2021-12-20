@@ -7,6 +7,9 @@ lazy val root = (project in file("."))
     name := "hpient",
     idePackagePrefix := Some("com.github.oliverdding.hpient"),
     libraryDependencies ++= Seq(
+      // JSON
+      "com.github.plokhotnyuk.jsoniter-scala" %% "jsoniter-scala-core"   % "2.12.0",
+      "com.github.plokhotnyuk.jsoniter-scala" %% "jsoniter-scala-macros" % "2.12.0" % "provided",
       // Apache Spark
       "org.apache.spark" %% "spark-core" % "3.2.0",
       "org.apache.spark" %% "spark-sql" % "3.2.0" % "provided",

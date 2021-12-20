@@ -4,7 +4,7 @@ package sql
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.sources.Filter
 
-import java.time.ZoneId
+import java.time.{Instant, ZoneId}
 
 private class ClickHouseSQL extends SQLHelper {
 
@@ -35,7 +35,15 @@ private class ClickHouseSQL extends SQLHelper {
 }
 
 object ClickHouseSQL {
-  class Builder extends Logging {
+
+  /**
+   * Used to Build [[ClickHouseSQL]], which would generate a sql string formatted.
+   *
+   * Need to set select part, namespace and table, and can set filter part.
+   * @param tz
+   *   Timezone that used to format [[Instant]] object
+   */
+  class Builder(tz: ZoneId) extends Logging {
 
     private var isSelectAll: Boolean = false
     private var fields: Option[Seq[String]] = None
@@ -80,23 +88,41 @@ object ClickHouseSQL {
       true
     }
 
-    def build(): String =
-      build(ZoneId.systemDefault())
-
     /**
      * Build the sql string from builder.
      *
      * Examples:
-     * scala
-     * ClickHouseSQL().select("name", "age", "born").from("home", "list").where( EqualTo("name",
-     * "oliverdding"),GreaterThan("age", 30), LessThan("born", Instant.now()) ).build(ZoneId.of("UTC+8"))
      *
-     * @param tz
-     *   Timezone that used to format java.time.Instant.
+     * {{{
+     * ClickHouseSQL(ZoneId.of("UTC+8"))
+     *     .select("name", "age", "born")
+     *     .from("home", "list")
+     *     .where(
+     *         EqualTo("name", "oliverdding"),
+     *         GreaterThan("age", 30),
+     *         LessThan("born", Instant.now())
+     *     )
+     *     .build()
+     * }}}
+     *
+     * or more simpler
+     *
+     * {{{
+     * ClickHouseSQL()
+     *     .select("name", "age", "born")
+     *     .from("home", "list")
+     *     .where(
+     *         EqualTo("name", "oliverdding"),
+     *         GreaterThan("age", 30),
+     *         LessThan("born", Instant.now())
+     *     )
+     *     .build()
+     * }}}
+     *
      * @return
      *   sql string
      */
-    def build(implicit tz: ZoneId): String = {
+    def build(): String = {
       if (!fulfill()) {
         throw new Exception("cannot construct sql because lack of parameters")
       }
@@ -115,6 +141,9 @@ object ClickHouseSQL {
     }
   }
 
+  def apply(tz: ZoneId): ClickHouseSQL.Builder =
+    new Builder(tz)
+
   def apply(): ClickHouseSQL.Builder =
-    new Builder()
+    new Builder(ZoneId.systemDefault())
 }

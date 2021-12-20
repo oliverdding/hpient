@@ -10,7 +10,7 @@ import java.sql.{Date, Timestamp}
 import java.time.{Instant, LocalDate, ZoneId}
 
 /**
- * Used to compile select and filter part
+ * Used to compile select and filter part of a sql string
  */
 trait SQLHelper {
 
@@ -64,7 +64,7 @@ trait SQLHelper {
     })
 
   private[sql] def _select(fields: Seq[String]): String =
-    fields.map(p => quoted(p)).mkString(" , ")
+    fields.map(p => quoted(p)).mkString(", ")
 
   private[sql] def _where(filters: Seq[Filter])(implicit tz: ZoneId): String =
     filters

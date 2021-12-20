@@ -27,10 +27,10 @@ class ClickHouseSQLTest extends AnyFunSuite {
   }
 
   test("different timezone") {
-    info(ClickHouseSQL().select("name", "age", "born").from("home", "list").where(
+    info(ClickHouseSQL(ZoneId.of("UTC+8")).select("name", "age", "born").from("home", "list").where(
       EqualTo("name", "oliverdding"),
       GreaterThan("age", 30),
       LessThan("born", Instant.now())
-    ).build(ZoneId.of("UTC+8")))
+    ).build())
   }
 }

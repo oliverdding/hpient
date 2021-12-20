@@ -1,7 +1,6 @@
 package com.github.oliverdding.hpient
 
 import org.apache.arrow.memory.RootAllocator
-import org.apache.arrow.vector.ValueVector
 import org.apache.arrow.vector.ipc.{ArrowFileReader, ArrowStreamReader, SeekableReadChannel}
 import org.apache.commons.compress.utils.{IOUtils, SeekableInMemoryByteChannel}
 import org.apache.log4j.{BasicConfigurator, Level, Logger}
@@ -22,13 +21,15 @@ class ArrowStreamTest extends AnyFunSuite {
 
   test("arrow stream from clickhouse") {
     val myRequest = basicRequest
-      .post(uri"http://dev:8123/")
+      .post(uri"http://159.75.36.118:5448/")
       .header("Connection", "Close")
       .header("Content-Type", "text/plain")
       .auth
       .basic("default", "")
       .response(asByteArray)
-      .body("SELECT * FROM system.table_engines FORMAT ArrowStream")
+      .body(
+        "SELECT * FROM tencent_public.singleton_dist WHERE category = 'PERF_CRASH' and data_time >= '2021-12-20 20:00:00' LIMIT 1 FORMAT ArrowStream"
+      )
 
     val backend = HttpURLConnectionBackend()
     val response = myRequest.send(backend)
@@ -38,18 +39,21 @@ class ArrowStreamTest extends AnyFunSuite {
       case Right(x) => x
     }
 
+    throw new Exception("test")
+
     Using(new RootAllocator(Long.MaxValue)) { allocator =>
       Using(new ArrowStreamReader(new ByteArrayInputStream(body), allocator)) {
         streamReader =>
-          while (streamReader.loadNextBatch())
-            Using(streamReader.getVectorSchemaRoot) { schemaRoot =>
-              println(schemaRoot.getSchema)
+          Using(streamReader.getVectorSchemaRoot) { schemaRoot =>
+            println(schemaRoot.getSchema)
+            while (streamReader.loadNextBatch()) {
               val fieldVectorItr = schemaRoot.getFieldVectors.iterator()
               val sparkVectors = fieldVectorItr.asScala
                 .map[ColumnVector] { fieldVector =>
                   new ArrowColumnVector(fieldVector)
                 }
                 .toArray
+              println("TTTTTTTT")
               Using(new ColumnarBatch(sparkVectors, schemaRoot.getRowCount)) {
                 columnarBatch =>
                   println("Got it --->")
@@ -57,7 +61,9 @@ class ArrowStreamTest extends AnyFunSuite {
                     s"rows: ${columnarBatch.numRows()}; cols: ${columnarBatch.numCols()}"
                   )
               }
+              println("EEEEEEEEE")
             }
+          }
       }
     }
 
