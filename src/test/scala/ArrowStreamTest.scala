@@ -19,19 +19,21 @@ class ArrowStreamTest extends AnyFunSuite {
   Logger.getRootLogger.setLevel(Level.WARN)
 
   test("arrow stream from clickhouse") {
+    val t0 = System.nanoTime
     val myRequest = basicRequest
-      .post(uri"http://159.75.36.118:5448/?buffer_size=1024&wait_end_of_query=1")
+      .post(uri"http://159.75.36.118:5448/")
       .header("Connection", "Close")
       .header("Content-Type", "text/plain")
       .auth
       .basic("default", "")
       .response(asByteArray)
       .body(
-        "SELECT app_id, platform, id, user_id, device_id, category, arch, os_ver, ip, region, version model FROM tencent_public.singleton_dist WHERE category = 'PERF_CRASH' and data_time >= '2021-12-20 20:00:00' LIMIT 100000 FORMAT ArrowStream"
+        "SELECT app_id, platform, id, user_id, device_id, category, arch, os_ver, ip, region, version model FROM tencent_public.singleton_dist WHERE category = 'PERF_CRASH' and data_time >= '2021-12-20 20:00:00' LIMIT 10000000 FORMAT ArrowStream"
       )
 
     val backend = HttpURLConnectionBackend()
     val response = myRequest.send(backend)
+    val t1 = System.nanoTime
     assert(response.code == StatusCode.Ok)
     val body = response.body match {
       case Left(x) => fail(s"HTTP return error: $x")
@@ -61,6 +63,11 @@ class ArrowStreamTest extends AnyFunSuite {
       println(s"batch has cols: ${batch.numCols()}")
       println(s"batch has rows: ${batch.numRows()}")
     }
+
+    val t2 = System.nanoTime
+
+    println(s"http get all data: ${(t1 - t0)/1e9d}")
+    println(s"processing data: ${(t2 - t1)/1e9d}")
 
     backend.close()
   }
